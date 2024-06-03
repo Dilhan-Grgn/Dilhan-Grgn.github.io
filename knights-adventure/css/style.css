@@ -1,0 +1,28 @@
+@import url("default.css");
+@import url("fonts.css");
+@import url("tiles.css");
+@import url("entities.css");
+@import url("ui.css");
+
+:root {
+	--grid-size: 16;
+	--square-size: min(calc(100vh/var(--grid-size) * 0.8), calc(100vw/var(--grid-size) * 0.8));
+	font-size: min(3vh, 3vw);
+	overflow: hidden;
+}
+
+h1 {
+	font-size: min(5vh, 5vw);
+}
+
+h2 {
+	font-size: min(4.5vh, 4.5vw);
+}
+
+h3 {
+	font-size: min(4vh, 4vw);
+}
+
+h4 {
+	font-size: min(3.5vh, 3.5vw);
+}

@@ -1,0 +1,13 @@
+#gui {
+	margin-top: calc(var(--square-size) / 10);
+}
+
+#health {
+	height: calc(var(--square-size) * 0.75);
+	display: flex;
+	gap: calc(var(--square-size) / 10);
+}
+
+#health * {
+	height: 100%;
+}

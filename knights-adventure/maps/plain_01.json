@@ -1,0 +1,42 @@
+{
+	"Map": [
+		["G","G","G","G","G"," "," ","G","G","G","G","G","G"," ","G","W"],
+		[" ","G"," "," ","G","G"," ","G"," "," ","G"," ","G"," ","G","W"],
+		["G","G"," ","G","G","G"," ","G"," ","G","G","G","G","G","G","W"],
+		["G"," ","G","G","G"," ","G"," ","G","G","G","G","G","G","G","W"],
+		["G"," ","G","G","G"," ","G","G","G"," ","G","G","G"," ","G","W"],
+		["G","G","G"," "," ","G"," ","G","G","G","G"," ","G","G"," ","W"],
+		["G","G","G","G"," ","G"," "," "," "," ","G"," ","G","G","G","W"],
+		[" ","G"," ","G"," "," "," "," "," ","G","G","G","G","G","G"," "],
+		["G","G","G","G","G","G","G","G","G","G"," ","G","G","G"," "," "],
+		["G","G","G","G","G","G","G","G","G"," "," ","G"," ","G"," ","W"],
+		[" "," ","G","G","G"," ","G","G","G","G","G","G","G","G","G","W"],
+		["G"," ","G","G"," ","G"," "," ","G","G"," ","G","G","G","G","W"],
+		["G","G","G","G","G"," "," ","G","G","G","G","G"," ","G"," ","W"],
+		["G"," "," ","G"," ","G"," "," ","G","G","G","G","G","G","G","W"],
+		["G"," ","G"," ","G","G","G","G","G","G","G"," "," "," ","G","W"],
+		[" "," "," ","G","G","G"," ","G","G","G","G","G","G","G"," ","W"]
+	],
+	"Entities": [
+		["AreaTrigger", 15, 7, "start", 1, 7],
+		["AreaTrigger", 15, 8, "start", 1, 8],
+
+		["AreaTrigger", 0, 0, "village", 14, 0],
+		["AreaTrigger", 0, 1, "village", 14, 1],
+		["AreaTrigger", 0, 2, "village", 14, 2],
+		["AreaTrigger", 0, 3, "village", 14, 3],
+		["AreaTrigger", 0, 4, "village", 14, 4],
+		["AreaTrigger", 0, 5, "village", 14, 5],
+		["AreaTrigger", 0, 6, "village", 14, 6],
+		["AreaTrigger", 0, 7, "village", 14, 7],
+		["AreaTrigger", 0, 8, "village", 14, 8],
+		["AreaTrigger", 0, 9, "village", 14, 9],
+		["AreaTrigger", 0, 10, "village", 14, 10],
+		["AreaTrigger", 0, 11, "village", 14, 11],
+		["AreaTrigger", 0, 12, "village", 14, 12],
+		["AreaTrigger", 0, 13, "village", 14, 13],
+		["AreaTrigger", 0, 14, "village", 14, 14],
+		["AreaTrigger", 0, 15, "village", 14, 15]
+	],
+	"Text": "You entered {MapSettings.WorldName} plains!"
+}

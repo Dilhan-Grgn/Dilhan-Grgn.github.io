@@ -1,0 +1,16 @@
+* {
+	background-repeat: no-repeat;
+	background-size: 100%;
+	font-family: 'Stepalange';
+	color: white;
+	image-rendering: pixelated;
+	user-select: none;
+}
+
+html {
+	background-color: black;
+}
+
+body {
+	margin: 0;
+}

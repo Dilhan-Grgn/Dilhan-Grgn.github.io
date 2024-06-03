@@ -1,0 +1,7 @@
+GameManager.Maps = loadMapsJSONs(MapSettings.Maps)
+drawGrid()
+loadMap('start')
+dialogBox.showText('You woke up in a field without anything!')
+const player = new Player(new Pos(7, 7))
+getCurEnts().add(player)
+reloadEntities()

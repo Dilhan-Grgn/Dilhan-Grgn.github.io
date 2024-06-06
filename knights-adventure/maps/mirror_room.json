@@ -20,8 +20,8 @@
 	"Entities": [
 		["Door", 7, 0, "mirror_doors", "castle", 3, 14],
 		["Door", 8, 0, "mirror_doors", "castle", 4, 14],
-		["Door", 7, 15, "mirror_doors", "other_side", 7, 1],
-		["Door", 8, 15, "mirror_doors", "other_side", 8, 1],
+		["Chest", 7, 15, "bomb", 3],
+		["Chest", 8, 15, "bomb", 3],
 
 		["Heart", 1, 1],
 		["Heart", 1, 14],

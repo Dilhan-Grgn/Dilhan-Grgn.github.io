@@ -40,6 +40,10 @@ Array.prototype.empty = function () {
 	return this.splice(0, this.length)
 }
 
+Set.prototype.filter = function (callbackFn) {
+	return new Set(Array.from(this).filter(callbackFn))
+}
+
 {
 	let uniqueID = 0
 	Object.prototype.uniqueID = function () {
@@ -65,4 +69,12 @@ Array.prototype.empty = function () {
 
 Math.clamp = function (x, min = 0, max = 1) {
 	return Math.min(Math.max(x, min), max)
+}
+
+Math.deg2rad = function(degrees) {
+	return degrees * Math.PI / 180;
+}
+
+Math.rad2deg = function(radians) {
+	return radians * 180 / Math.PI;
 }

@@ -39,6 +39,5 @@ const Collision = {
 	Transparent: 1,
 }
 
-const EntitiesGrid = []
 const ObjectsGrid = []
 const DisplayGrid = []

@@ -35,7 +35,7 @@ const MapSettings = {
 const GameSettings = {
 	TPS: 1000 / 5,
 	MaxHealth: 5,
-	ValidKeys: ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyE', 'Space']
+	ValidKeys: ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyE', 'Space', 'KeyQ']
 }
 
 const GameManager = {

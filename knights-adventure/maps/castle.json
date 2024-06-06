@@ -21,6 +21,11 @@
 		["AreaTrigger", 15, 7, "village", 1, 7],
 		["AreaTrigger", 15, 8, "village", 1, 8],
 
+		["AreaTrigger", 3, 0, "court", 7, 1],
+		["AreaTrigger", 4, 0, "court", 8, 1],
+		["CrackedWall", 3, 1],
+		["CrackedWall", 4, 1],
+
 		["AreaTrigger", 3, 15, "mirror_room", 7, 1],
 		["AreaTrigger", 4, 15, "mirror_room", 8, 1]
 	],

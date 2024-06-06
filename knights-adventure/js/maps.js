@@ -117,5 +117,5 @@ function loadMap(mapName) {
 	}
 
 	drawMap()
-	reloadEntities()
+	drawEntities()
 }

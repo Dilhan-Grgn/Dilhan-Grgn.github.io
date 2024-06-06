@@ -38,6 +38,8 @@ function update() {
 		health.appendChild(heart)
 	}
 
+	bombCounter.innerHTML = player.Inventory.bomb ? player.Inventory.bomb : 0
+
 	getCurEnts().forEach((entity) => {
 		entity.update()
 	})

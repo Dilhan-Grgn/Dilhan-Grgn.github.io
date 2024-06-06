@@ -52,20 +52,6 @@ function drawMap() {
 	gui.style.top = `${MapSettings.GridSize}px`
 }
 
-function reloadEntities() {
-	EntitiesGrid.empty()
-	for (let col = 0; col < MapSettings.Height; col++) {
-		const entitiesCol = []
-		EntitiesGrid.push(entitiesCol)
-	}
-
-	getCurEnts().forEach(entity => {
-		EntitiesGrid[entity.Pos.X][entity.Pos.Y] = entity
-	})
-
-	drawEntities()
-}
-
 function drawEntities() {
 	const children = Array.prototype.slice.call(entitiesDisplay.children)
 	children.forEach(child => {
@@ -91,4 +77,8 @@ function drawEntities() {
 
 		fillElement(element, entity.Pos, entity)
 	})
+}
+
+function resizeGUI() {
+	gui.style.width = `${MapSettings.Width * MapSettings.CellSize}px`
 }

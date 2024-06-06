@@ -44,6 +44,8 @@ function KeyUpdates(keycode) {
 			player.use(player.Dir)
 		if (keycode === 'Space' && player.Sword)
 			player.attack(player.Dir)
+		if (keycode === 'KeyQ')
+			player.bomb()
 
 		updatePlayer()
 	}
@@ -121,4 +123,5 @@ function updateEvil() {
 onresize = () => {
 	drawMap()
 	drawEntities()
+	resizeGUI()
 }

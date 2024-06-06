@@ -50,36 +50,28 @@ function toTile(tileCharacter) {
 }
 
 function getTile(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return false
+	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
 
 	const object = (ObjectsGrid && ObjectsGrid[pos.X] && ObjectsGrid[pos.X][pos.Y]) ? ObjectsGrid[pos.X][pos.Y] : null
 
-	return object && ((filters.includes(object.Col)) != filterOut) ? object : false
+	return object && ((filters.includes(object.Col)) != filterOut) ? object : null
 }
 
-function getEntity(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return false
+function getEntities(pos, filters = [Collision.Transparent], filterOut = true) {
+	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
 
-	const entity = (EntitiesGrid && EntitiesGrid[pos.X] && EntitiesGrid[pos.X][pos.Y]) ? EntitiesGrid[pos.X][pos.Y] : null
+	const entities = getCurEnts().filter(entity => ((filters.includes(entity.Col)) != filterOut) && Pos.compare(entity.Pos, pos));
 
-	return entity && ((filters.includes(entity.Col)) != filterOut) ? entity : false
+	return entities.size > 0 ? entities : null
 }
 
 function getObjects(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return false
+	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
 
 	const tile = getTile(pos, filters, filterOut)
-	const entity = getEntity(pos, filters, filterOut)
+	const entities = getEntities(pos, filters, filterOut)
 
-	if (filters && !Array.isArray(filters)) {
-		filters = [filters]
-	}
-
-	if (filters && filters.length > 0) {
-		return (tile && ((filters.includes(tile.Col)) != filterOut) || entity && ((filters.includes(entity.Col)) != filterOut)) ? { Tile: tile, Entity: entity } : false
-	} else {
-		return { Tile: tile, Entity: entity }
-	}
+	return tile || entities ? { Tile: tile, Entities: entities } : null
 }
 
 function getCurEnts() {

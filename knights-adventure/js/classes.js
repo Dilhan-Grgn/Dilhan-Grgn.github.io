@@ -75,7 +75,7 @@ class Pos {
 	}
 }
 
-Pos.Equal = function (pos1, pos2) {
+Pos.compare = function (pos1, pos2) {
 	return pos1.X === pos2.X && pos1.Y === pos2.Y
 }
 

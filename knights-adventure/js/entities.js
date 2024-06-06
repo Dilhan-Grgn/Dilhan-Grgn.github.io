@@ -30,16 +30,42 @@ function activate(id, user) {
 	})
 }
 
-function addEntity(mapName, entity) {
-	getEnts(mapName).add(entity)
+function addEntity(entity, mapName) {
+	if (mapName) {
+		getEnts(mapName).add(entity)
+	} else {
+		getCurEnts().add(entity)
+	}
 	GameManager.Entities.add(entity)
+}
+
+function slashEffect(pos, dir) {
+	const effect = document.createElement('div')
+	effectsDisplay.appendChild(effect)
+
+	fillElement(effect, pos)
+	let curFrame = 0
+	let rotation = Math.rad2deg(Math.atan2(dir.dy, dir.dx)) + 90
+
+	effect.style.transform = `rotate(${rotation}deg)`
+	effect.classList.add('effect')
+
+	effect.style.backgroundImage = `url(img/effects/Slash/Slash_${curFrame++}.png)`
+	const interval = setInterval(() => {
+		effect.style.backgroundImage = `url(img/effects/Slash/Slash_${curFrame++}.png)`
+		if (curFrame > 8) {
+			effect.remove()
+			clearInterval(interval)
+		}
+	}, 20)
+
 }
 
 // Entities
 
 class Entity {
 	constructor(pos, col = Collision.Solid, dir = Directions.South) {
-		this.Pos = pos
+		this.Pos = new Pos(pos.X, pos.Y)
 		this.Col = col
 		this.Dir = dir
 		this.Sprite = 0
@@ -52,7 +78,6 @@ class Entity {
 				map.Entities.add(newEntity)
 			}
 		})
-		EntitiesGrid[this.Pos.X][this.Pos.Y] = newEntity
 		GameManager.Entities.delete(this)
 		GameManager.Entities.add(newEntity)
 		delete this
@@ -202,6 +227,43 @@ class Button extends Entity {
 	}
 }
 
+class Bomb extends Entity {
+	constructor(pos) {
+		super(pos, Collision.Transparent)
+		this.timeout = setTimeout(() => {
+			this.explode()
+		}, 3 * 1000);
+	}
+
+	explode() {
+		let entities = new Set()
+		Object.entries(Directions).forEach(([_, dir]) => {
+			const pos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
+			const ents = getEntities(pos, [])
+			if (ents) {
+				entities = entities.union(ents)
+			}
+			slashEffect(pos, dir)
+		})
+
+		entities.forEach(entity => {
+			if ((entity instanceof NPC))
+				entity.takeDamage(2, this)
+		})
+
+		entities = getEntities(this.Pos, [])
+		if (entities) {
+			entities.forEach(entity => {
+				if ((entity instanceof NPC))
+					entity.takeDamage(3, this)
+			})
+		}
+
+		this.delete()
+		drawEntities()
+	}
+}
+
 // NPC
 
 class NPC extends Entity {
@@ -213,7 +275,7 @@ class NPC extends Entity {
 		this.Dead = false
 	}
 
-	triggerEvents(objects, ...args) {
+	triggerEvents(entities, ...args) {
 		return
 	}
 
@@ -249,15 +311,15 @@ class NPC extends Entity {
 
 		drawEntities()
 
-		const objects = getObjects(nextPos)
-		if (objects) {
-			this.triggerEvents(objects, dir)
+		const entities = getEntities(nextPos)
+		if (entities) {
+			this.triggerEvents(entities, dir)
 			return
 		}
 
-		const tObjects = getObjects(nextPos, [Collision.Transparent], false)
-		if (tObjects) {
-			this.triggerEvents(tObjects, dir)
+		const tEntities = getEntities(nextPos, [Collision.Transparent], false)
+		if (tEntities) {
+			this.triggerEvents(tEntities, dir)
 		}
 
 		if (this.Stunned && !isPlayer)
@@ -266,11 +328,11 @@ class NPC extends Entity {
 		if (!this.Pos.isValidDiagonal(map, dir)) return
 		// if (getObjects(new Pos(nextPos.X, this.Pos.Y)) && getObjects(new Pos(this.Pos.X, nextPos.Y))) return
 
-		if (Pos.Equal(nextPos, this.Pos) || !nextPos.isValid(map)) return
+		if (Pos.compare(nextPos, this.Pos) || !nextPos.isValid(map)) return
 
 		this.Pos.setPos(nextPos)
 
-		reloadEntities()
+		drawEntities()
 	}
 
 	moveTowards(pos) {
@@ -292,39 +354,16 @@ class NPC extends Entity {
 				return
 
 			const attackPos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
-			const entity = getEntity(attackPos)
+			const entities = getEntities(attackPos)
 
-			const effect = document.createElement('div')
-			effectsDisplay.appendChild(effect)
+			slashEffect(attackPos, dir)
 
-			fillElement(effect, attackPos)
-			let curFrame = 0
-			let rotation = 0
-			switch (dir) {
-				case Directions.East:
-					rotation = 90
-					break;
-				case Directions.South:
-					rotation = 180
-					break;
-				case Directions.West:
-					rotation = 270
-					break;
-			}
-			effect.style.transform = `rotate(${rotation}deg)`
-			effect.classList.add('effect')
-
-			effect.style.backgroundImage = `url(img/effects/Slash/Slash_${curFrame++}.png)`
-			const interval = setInterval(() => {
-				effect.style.backgroundImage = `url(img/effects/Slash/Slash_${curFrame++}.png)`
-				if (curFrame > 8) {
-					effect.remove()
-					clearInterval(interval)
-				}
-			}, 10)
-
-			if (entity && entity.takeDamage && typeof entity.takeDamage === 'function') {
-				entity.takeDamage(this.Damage, this)
+			if (entities) {
+				entities.forEach(entity => {
+					if (entity && entity.takeDamage && typeof entity.takeDamage === 'function') {
+						entity.takeDamage(this.Damage, this)
+					}
+				});
 			}
 
 			this.AttackCooldown = true
@@ -347,10 +386,10 @@ class NPC extends Entity {
 				this.Dead = true
 				this.onDeath(attacker)
 			}
-			reloadEntities()
+			drawEntities()
 		}, Math.abs(damage) * 500)
 
-		reloadEntities()
+		drawEntities()
 	}
 }
 
@@ -361,24 +400,29 @@ class Player extends NPC {
 		this.Inventory = {}
 	}
 
-	triggerEvents(objects, ...args) {
-		if (objects.Entity.trigger) {
-			this.InTrigger = true
-			objects.Entity.trigger(this)
-			this.InTrigger = false
-		}
-		super.triggerEvents(objects, ...args)
+	triggerEvents(entities, ...args) {
+		entities.forEach(entity => {
+			if (entity.trigger) {
+				this.InTrigger = true
+				entity.trigger(this)
+				this.InTrigger = false
+			}
+		});
+		super.triggerEvents(entities, ...args)
 	}
 
 	use(dir) {
-		const tileX = this.Pos.X + dir.dx
-		const tileY = this.Pos.Y + dir.dy
-		const object = EntitiesGrid[tileX][tileY]
+		const usePos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
+		const entities = getEntities(usePos, [])
 
-		if (object && object.onUse && typeof object.onUse === 'function') {
-			object.onUse(this)
-			drawEntities()
+		if (entities) {
+			entities.forEach(entity => {
+				if (entity && entity.onUse && typeof entity.onUse === 'function') {
+					entity.onUse(this)
+				}
+			});
 		}
+		drawEntities()
 	}
 
 	onDeath(attacker) {
@@ -397,6 +441,13 @@ class Player extends NPC {
 
 	move(dir) {
 		super.move(dir)
+	}
+
+	bomb() {
+		if (this.Inventory.bomb && this.Inventory.bomb > 0) {
+			addEntity(new Bomb(this.Pos))
+			this.Inventory.bomb--
+		}
 	}
 }
 
@@ -419,41 +470,41 @@ class Mirror extends NPC {
 	}
 
 	onDeath() {
-		const right = getEntity(new Pos(this.Pos.X + 1, this.Pos.Y))
-		const left = getEntity(new Pos(this.Pos.X - 1, this.Pos.Y))
-		const up = getEntity(new Pos(this.Pos.X, this.Pos.Y - 1))
-		const down = getEntity(new Pos(this.Pos.X, this.Pos.Y + 1))
-		if ((right instanceof Mirror))
-			right.takeDamage(1)
-		if ((left instanceof Mirror))
-			left.takeDamage(1)
-		if ((up instanceof Mirror))
-			up.takeDamage(1)
-		if ((down instanceof Mirror))
-			down.takeDamage(1)
+		const right = getEntities(new Pos(this.Pos.X + 1, this.Pos.Y))
+		const left = getEntities(new Pos(this.Pos.X - 1, this.Pos.Y))
+		const up = getEntities(new Pos(this.Pos.X, this.Pos.Y - 1))
+		const down = getEntities(new Pos(this.Pos.X, this.Pos.Y + 1))
+
+		let entities = new Set()
+
+		if (right) entities = entities.union(right)
+		if (left) entities = entities.union(left)
+		if (up) entities = entities.union(up)
+		if (down) entities = entities.union(down)
+
+		entities.forEach(entity => {
+			if ((entity instanceof Mirror))
+				entity.takeDamage(1, this)
+		})
 
 		const evil = getCurEnt(Evil)
 		if (evil && !evil.Active) {
 			evil.Active = true
 		}
 
-		//const newDoors = [
-		//	new Door(new Pos(7, 0), 'mirror_doors', 'castle', 3, 14),
-		//	new Door(new Pos(8, 0), 'mirror_doors', 'castle', 4, 14),
-		//	new Door(new Pos(7, 15), 'mirror_doors', 'other_side', 7, 1),
-		//	new Door(new Pos(8, 15), 'mirror_doors', 'other_side', 8, 1)
-		//]
-		//
-		//const roomName = 'mirror_room'
-		//newDoors.forEach(door => {
-		//	const ent = getEntity(door.Pos)
-		//	if (ent && !(ent instanceof Door))
-		//		ent.replace(door)
-		//	else if (!ent)
-		//		addEntity(roomName, door)
-		//})
-
 		super.onDeath()
+	}
+}
+
+class CrackedWall extends NPC {
+	constructor(pos) {
+		super(pos, 1)
+	}
+
+	takeDamage(damage, attacker) {
+		if ((attacker instanceof Bomb)) {
+			super.takeDamage(damage, attacker)
+		}
 	}
 }
 
@@ -466,11 +517,13 @@ class Enemy extends NPC {
 		this.MoveOffset = Math.round(Math.random() * 10)
 	}
 
-	triggerEvents(objects, ...args) {
-		if ((objects.Entity instanceof Player)) {
-			this.attack(args[0])
-		}
-		super.triggerEvents(objects, ...args)
+	triggerEvents(entities, ...args) {
+		entities.forEach(entity => {
+			if ((entity instanceof Player)) {
+				this.attack(args[0])
+			}
+		});
+		super.triggerEvents(entities, ...args)
 	}
 
 	update() {

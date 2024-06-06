@@ -32,7 +32,7 @@ function bfs(map, startPos, endPos) {
 	queue.push(startPos)
 	while (queue.length > 0) {
 		const curPos = queue.shift()
-		if (Pos.Equal(curPos, endPos)) {
+		if (Pos.compare(curPos, endPos)) {
 			return reconstructPath(curPos, map)
 		}
 

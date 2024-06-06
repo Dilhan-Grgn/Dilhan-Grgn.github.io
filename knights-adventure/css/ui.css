@@ -26,12 +26,21 @@ SOFTWARE.
 	margin-top: calc(var(--square-size) / 10);
 }
 
-#health {
+#gui header {
+	display: flex;
+	justify-content: space-between;
+}
+
+#gui header * {
+	vertical-align: middle;
+}
+
+#gui header > * {
 	height: calc(var(--square-size) * 0.75);
 	display: flex;
 	gap: calc(var(--square-size) / 10);
 }
 
-#health * {
+#gui header > * > * {
 	height: 100%;
 }

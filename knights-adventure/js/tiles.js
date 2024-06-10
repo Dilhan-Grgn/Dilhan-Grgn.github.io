@@ -23,8 +23,9 @@ SOFTWARE.
 */
 
 class Tile {
-	constructor(col = Collision.Solid) {
+	constructor(col = Collision.Solid, fileType = 'png') {
 		this.Col = col
+		this.FileType = fileType
 	}
 }
 
@@ -49,5 +50,11 @@ class CarpetNorth extends Tile {
 class CarpetSouth extends Tile {
 	constructor() {
 		super(Collision.Transparent)
+	}
+}
+
+class Water extends Tile {
+	constructor() {
+		super(Collision.Transparent, 'gif')
 	}
 }

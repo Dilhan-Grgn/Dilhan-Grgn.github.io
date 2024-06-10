@@ -128,7 +128,7 @@ function fillElement(element, pos, object) {
 		element.classList.add('tile')
 		if (object) {
 			tileClass = object.constructor.name
-			element.style.backgroundImage = `url(img/tiles/${object.constructor.name}.png)`
+			element.style.backgroundImage = `url(img/tiles/${object.constructor.name}.${object.FileType})`
 		} else {
 			element.style.backgroundImage = ''
 		}

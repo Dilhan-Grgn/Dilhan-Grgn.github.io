@@ -22,78 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-function toTile(tileCharacter) {
-	let tile = null
+import { MapSettings, GameSettings } from "./manager.js";
+import { Tile } from "./tiles.js";
+import { Entity } from "./entities.js";
+import { Pos } from "./classes.js";
 
-	tileParams = tileCharacter.split(':')
-	params = tileParams[1] ? tileParams[1].split(';') : []
-
-	if (tileParams)
-		tileCharacter = tileParams[0]
-
-	switch (tileCharacter[0]) {
-		case 'W':
-			tile = new Wall()
-			break;
-		case 'G':
-			tile = new Grass()
-			break;
-		case 'U':
-			tile = new CarpetNorth()
-			break;
-		case 'D':
-			tile = new CarpetSouth()
-			break;
-	}
-
-	return tile
-}
-
-function getTile(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
-
-	const object = (ObjectsGrid && ObjectsGrid[pos.X] && ObjectsGrid[pos.X][pos.Y]) ? ObjectsGrid[pos.X][pos.Y] : null
-
-	return object && ((filters.includes(object.Col)) != filterOut) ? object : null
-}
-
-function getEntities(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
-
-	const entities = getCurEnts().filter(entity => ((filters.includes(entity.Col)) != filterOut) && Pos.compare(entity.Pos, pos));
-
-	return entities.size > 0 ? entities : null
-}
-
-function getObjects(pos, filters = [Collision.Transparent], filterOut = true) {
-	if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
-
-	const tile = getTile(pos, filters, filterOut)
-	const entities = getEntities(pos, filters, filterOut)
-
-	return tile || entities ? { Tile: tile, Entities: entities } : null
-}
-
-function getCurEnts() {
-	return getEnts(MapSettings.CurMap)
-}
-
-function getCurEnt(type) {
-	const ents = Array.from(getCurEnts())
-	if (Array.isArray(ents)) {
-		return ents.find(entity => entity instanceof type)
-	}
-}
-
-function getEnts(map) {
-	return GameManager.Maps.get(map).Entities
-}
-
-function posToScreen(pos) {
-	return new Pos(((window.innerWidth - MapSettings.GridSize) / 2) + (MapSettings.CellSize * pos.X), MapSettings.CellSize * pos.Y)
-}
-
-function fillElement(element, pos, object) {
+export function fillElement(element, pos, object) {
 	MapSettings.CellSize = Math.min(window.innerHeight / MapSettings.Height * 0.8, window.innerWidth / MapSettings.Width * 0.8)
 	MapSettings.GridSize = Math.min(MapSettings.CellSize * MapSettings.Width, MapSettings.CellSize * MapSettings.Height)
 
@@ -103,7 +37,7 @@ function fillElement(element, pos, object) {
 	element.style.position = 'absolute'
 	element.style.width = `${MapSettings.CellSize}px`
 	element.style.height = `${MapSettings.CellSize}px`
-	const screen = posToScreen(pos)
+	const screen = Pos.posToScreen(pos)
 	element.style.left = `${screen.X}px`
 	element.style.top = `${screen.Y}px`
 	element.style.backgroundColor = 'transparent'
@@ -127,11 +61,11 @@ function fillElement(element, pos, object) {
 	if (object instanceof Tile) {
 		element.classList.add('tile')
 		if (object) {
-			tileClass = object.constructor.name
+			const tileClass = object.constructor.name
 			element.style.backgroundImage = `url(img/tiles/${object.constructor.name}.${object.FileType})`
+			element.classList.add(tileClass)
 		} else {
 			element.style.backgroundImage = ''
 		}
-		element.classList.add(tileClass)
 	}
 }

@@ -22,38 +22,77 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-class Tile {
+import { ObjectsGrid } from "./consts.js";
+import { MapSettings } from "./manager.js";
+import { Collision } from "./classes.js";
+
+export class Tile {
 	constructor(col = Collision.Solid, fileType = 'png') {
 		this.Col = col
 		this.FileType = fileType
 	}
+
+	static toTile(tileCharacter) {
+		let tile = null
+
+		const tileParams = tileCharacter.split(':')
+		const params = tileParams[1] ? tileParams[1].split(';') : []
+
+		if (tileParams)
+			tileCharacter = tileParams[0]
+
+		switch (tileCharacter[0]) {
+			case 'W':
+				tile = new Wall()
+				break;
+			case 'G':
+				tile = new Grass()
+				break;
+			case 'U':
+				tile = new CarpetNorth()
+				break;
+			case 'D':
+				tile = new CarpetSouth()
+				break;
+		}
+
+		return tile
+	}
+
+	static getTile(pos, filters = [Collision.Transparent], filterOut = true) {
+		if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
+
+		const object = (ObjectsGrid && ObjectsGrid[pos.X] && ObjectsGrid[pos.X][pos.Y]) ? ObjectsGrid[pos.X][pos.Y] : null
+
+		return object && ((filters.includes(object.Col)) != filterOut) ? object : null
+	}
 }
 
-class Wall extends Tile {
+export class Wall extends Tile {
 	constructor() {
 		super(Collision.Solid)
 	}
 }
 
-class Grass extends Tile {
+export class Grass extends Tile {
 	constructor() {
 		super(Collision.Transparent)
 	}
 }
 
-class CarpetNorth extends Tile {
+export class CarpetNorth extends Tile {
 	constructor() {
 		super(Collision.Transparent)
 	}
 }
 
-class CarpetSouth extends Tile {
+export class CarpetSouth extends Tile {
 	constructor() {
 		super(Collision.Transparent)
 	}
 }
 
-class Water extends Tile {
+export class Water extends Tile {
 	constructor() {
 		super(Collision.Transparent, 'gif')
 	}

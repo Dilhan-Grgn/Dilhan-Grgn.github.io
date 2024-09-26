@@ -22,22 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const Directions = {
-	None: new Direction(0, 0),
-	West: new Direction(-1, 0),
-	East: new Direction(1, 0),
-	North: new Direction(0, -1),
-	South: new Direction(0, 1),
-	NorthWest: new Direction(-1, -1),
-	SouthWest: new Direction(-1, 1),
-	NorthEast: new Direction(1, -1),
-	SouthEast: new Direction(1, 1),
-}
+import { Direction } from "./classes.js";
 
-const Collision = {
-	Solid: 0,
-	Transparent: 1,
-}
-
-const ObjectsGrid = []
-const DisplayGrid = []
+export const ObjectsGrid = []
+export const DisplayGrid = []

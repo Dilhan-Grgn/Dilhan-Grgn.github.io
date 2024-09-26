@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { MapSettings } from "./manager.js";
+
 String.prototype.evalVariables = function () {
 	let tempStr = this
 	const matches = tempStr.match(/({.*?})/gm) || []

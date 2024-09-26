@@ -22,7 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-class Pos {
+import { MapSettings } from "./manager.js";
+import { Tile } from "./tiles.js";
+import { Entity } from "./entities.js";
+
+export class Pos {
 	constructor(x, y) {
 		this.setPos(x, y)
 	}
@@ -73,13 +77,26 @@ class Pos {
 		this.X = x
 		this.Y = y
 	}
+
+	compare(pos2) {
+		return this.X === pos2.X && this.Y === pos2.Y
+	}
+
+	static posToScreen(pos) {
+		return new this(((window.innerWidth - MapSettings.GridSize) / 2) + (MapSettings.CellSize * pos.X), MapSettings.CellSize * pos.Y)
+	}
+
+	getObjects(filters = [Collision.Transparent], filterOut = true) {
+		if (this.X >= MapSettings.Width || this.Y >= MapSettings.Height || this.X < 0 || this.Y < 0) return null
+
+		const tile = Tile.getTile(this, filters, filterOut)
+		const entities = Entity.getEntities(this, filters, filterOut)
+
+		return tile || entities ? { Tile: tile, Entities: entities } : null
+	}
 }
 
-Pos.compare = function (pos1, pos2) {
-	return pos1.X === pos2.X && pos1.Y === pos2.Y
-}
-
-class Direction {
+export class Direction {
 	#x
 	#y
 	constructor(dx, dy) {
@@ -121,14 +138,31 @@ class Direction {
 	}
 
 	get dx() { return this.#x }
-	set dx(value) { if (value instanceof undefined) {this.#x = value} else throw Error('Cannot edit direction values.') }
+	set dx(value) { if (value instanceof undefined) { this.#x = value } else throw Error('Cannot edit direction values.') }
 	get dy() { return this.#y }
-	set dy(value) { if (value instanceof undefined) {this.#y = value} else throw Error('Cannot edit direction values.') }
+	set dy(value) { if (value instanceof undefined) { this.#y = value } else throw Error('Cannot edit direction values.') }
 }
 
-class Health {
+export class Health {
 	constructor(health = 3, maxHealth = 3) {
 		this.Health = health
 		this.MaxHealth = maxHealth
 	}
+}
+
+export class Directions {
+	static None = new Direction(0, 0)
+	static West = new Direction(-1, 0)
+	static East = new Direction(1, 0)
+	static North = new Direction(0, -1)
+	static South = new Direction(0, 1)
+	static NorthWest = new Direction(-1, -1)
+	static SouthWest = new Direction(-1, 1)
+	static NorthEast = new Direction(1, -1)
+	static SouthEast = new Direction(1, 1)
+}
+
+export class Collision {
+	static Solid = 0
+	static Transparent = 1
 }

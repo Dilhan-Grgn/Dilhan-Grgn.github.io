@@ -22,6 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Entity, Player } from "./entities.js"
+import { loadMapsJSONs, loadMap } from "./maps.js"
+import { GameManager, MapSettings, GameSettings } from "./manager.js"
+import { drawGrid } from "./renderer.js"
+import { Pos, Directions } from "./classes.js"
+import { drawEntities, resizeGUI } from "./renderer.js"
+
 const KEY_UPDATE_MAP = new Map()
 
 function KeyUpdates(keycode) {
@@ -47,7 +54,7 @@ function KeyUpdates(keycode) {
 		if (keycode === 'KeyQ')
 			player.bomb()
 
-		updatePlayer()
+		player.reload()
 	}
 }
 
@@ -74,50 +81,7 @@ onmousemove = (event) => {
 	if (!player) return
 
 	GameManager.MousePos.setPos(event.clientX, event.clientY)
-	updatePlayer()
-}
-
-function updatePlayer() {
-	const pPos = posToScreen(player.Pos)
-	pPos.X += MapSettings.CellSize / 2
-	pPos.Y += MapSettings.CellSize / 2
-
-	const relPos = new Pos(GameManager.MousePos.X - pPos.X, GameManager.MousePos.Y - pPos.Y)
-
-	if (relPos.X > 0) {
-		player.Mirrored = false
-	}
-	else if (relPos.X < 0) {
-		player.Mirrored = true
-	}
-
-	if (Math.abs(relPos.X) > Math.abs(relPos.Y)) {
-		if (relPos.X > 0)
-			player.Dir = Directions.East
-		else if (relPos.X < 0)
-			player.Dir = Directions.West
-	} else if (Math.abs(relPos.X) < Math.abs(relPos.Y)) {
-		if (relPos.Y > 0)
-			player.Dir = Directions.South
-		else if (relPos.Y < 0)
-			player.Dir = Directions.North
-	}
-
-	updateEvil()
-	drawEntities()
-}
-
-function updateEvil() {
-	const evil = getCurEnt(Evil)
-	if (evil && !evil.Active) {
-		evil.Pos.setPos(player.Pos.X, (MapSettings.Height - 1) - player.Pos.Y)
-		evil.Dir = player.Dir
-		evil.Mirrored = player.Mirrored
-		if (evil.Dir === Directions.North)
-			evil.Dir = Directions.South
-		else if (evil.Dir === Directions.South)
-			evil.Dir = Directions.North
-	}
+	player.reload()
 }
 
 onresize = () => {
@@ -125,3 +89,41 @@ onresize = () => {
 	drawEntities()
 	resizeGUI()
 }
+
+function update() {
+	if (!player) return
+
+	health.innerHTML = ''
+	for (let i = 1; i <= player.Health.MaxHealth; i++) {
+		const heart = document.createElement('img')
+		heart.src = 'img/ui/empty_heart.png'
+		if (i <= player.Health.Health)
+			heart.src = 'img/ui/heart.png'
+		health.appendChild(heart)
+	}
+
+	bombCounter.innerHTML = player.Inventory.bomb ? player.Inventory.bomb : 0
+
+	Entity.getCurEnts().forEach((entity) => {
+		entity.update()
+	})
+
+	GameManager.TickCount++
+}
+
+var player
+function main(...args) {
+	GameManager.Maps = loadMapsJSONs(MapSettings.Maps)
+	drawGrid()
+	loadMap('start')
+	dialogBox.showText('You woke up in a field without anything!')
+	player = new Player(new Pos(7, 7))
+	Entity.getCurEnts().add(player)
+	drawEntities()
+	resizeGUI()
+	setInterval(() => {
+		update()
+	}, GameSettings.TPS)
+}
+
+main()

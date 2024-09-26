@@ -22,7 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-class Grid {
+import { Chest, AreaTrigger, Teleporter, Spike, Door, Heart, Button, Bomb, Player, Bush, Mirror, CrackedWall, Zombie, Evil } from "./entities.js";
+import { Pos } from "./classes.js";
+import { GameManager, MapSettings } from "./manager.js"
+import { ObjectsGrid } from "./consts.js";
+import { Tile } from "./tiles.js"
+import { drawMap, drawEntities } from "./renderer.js"
+
+export class Grid {
 	constructor(map, entities, text) {
 		this.Map = map
 		this.Entities = entities || new Set()
@@ -30,7 +37,7 @@ class Grid {
 	}
 }
 
-function getCollisionMap() {
+export function getCollisionMap() {
 	const width = MapSettings.Width
 	const height = MapSettings.Height
 
@@ -38,7 +45,7 @@ function getCollisionMap() {
 	for (let x = 0; x < width; x++) {
 		const col = []
 		for (let y = 0; y < height; y++) {
-			if (!getObjects(new Pos(x, y))) {
+			if (!new Pos(x, y).getObjects()) {
 				col.push(0)
 			} else {
 				col.push(1)
@@ -50,7 +57,7 @@ function getCollisionMap() {
 	return walls
 }
 
-function parseEntities(entities) {
+export function parseEntities(entities) {
 	const newEntities = new Set()
 	entities.forEach(entity => {
 		const classRef = eval(entity[0])
@@ -75,7 +82,7 @@ function parseEntities(entities) {
 	return newEntities
 }
 
-function loadMapsJSONs(files) {
+export function loadMapsJSONs(files) {
 	const tmpMaps = new Map()
 
 	files.forEach(file => {
@@ -94,7 +101,7 @@ function loadMapsJSONs(files) {
 	return tmpMaps
 }
 
-function loadMap(mapName) {
+export function loadMap(mapName) {
 	MapSettings.CurMap = mapName
 	const map = GameManager.Maps.get(mapName).Map
 
@@ -105,7 +112,7 @@ function loadMap(mapName) {
 		for (let y = 0; y < MapSettings.Height; y++) {
 			const tileString = map[y][x]
 
-			const tileObject = toTile(tileString)
+			const tileObject = Tile.toTile(tileString)
 
 			objectsCol.push(tileObject)
 		}

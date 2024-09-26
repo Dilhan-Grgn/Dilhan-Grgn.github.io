@@ -22,7 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-function activate(id, user) {
+import { Pos, Health, Collision, Directions } from "./classes.js";
+import { bfs } from "./bfs.js";
+import { MapSettings, GameManager, GameSettings } from "./manager.js"
+import { drawEntities } from "./renderer.js";
+import { getCollisionMap, loadMap } from "./maps.js";
+import { fillElement } from "./utils.js";
+
+export function activate(id, user) {
 	GameManager.Entities.forEach((entity) => {
 		if (entity.ID === id) {
 			entity.activate(user)
@@ -30,16 +37,7 @@ function activate(id, user) {
 	})
 }
 
-function addEntity(entity, mapName) {
-	if (mapName) {
-		getEnts(mapName).add(entity)
-	} else {
-		getCurEnts().add(entity)
-	}
-	GameManager.Entities.add(entity)
-}
-
-function slashEffect(pos, dir) {
+export function slashEffect(pos, dir) {
 	const effect = document.createElement('div')
 	effectsDisplay.appendChild(effect)
 
@@ -63,7 +61,7 @@ function slashEffect(pos, dir) {
 
 // Entities
 
-class Entity {
+export class Entity {
 	constructor(pos, col = Collision.Solid, dir = Directions.South) {
 		this.Pos = new Pos(pos.X, pos.Y)
 		this.Col = col
@@ -84,7 +82,7 @@ class Entity {
 	}
 
 	delete() {
-		getCurEnts().delete(this)
+		Entity.getCurEnts().delete(this)
 		GameManager.Entities.delete(this)
 		delete this
 	}
@@ -100,9 +98,41 @@ class Entity {
 	activate(user) {
 		return
 	}
+
+	static getEnts(map) {
+		return GameManager.Maps.get(map).Entities
+	}
+
+	static getCurEnt(type) {
+		const ents = Array.from(Entity.getCurEnts())
+		if (Array.isArray(ents)) {
+			return ents.find(entity => entity instanceof type)
+		}
+	}
+
+	static getCurEnts() {
+		return this.getEnts(MapSettings.CurMap)
+	}
+
+	static getEntities(pos, filters = [Collision.Transparent], filterOut = true) {
+		if (pos.X >= MapSettings.Width || pos.Y >= MapSettings.Height || pos.X < 0 || pos.Y < 0) return null
+
+		const entities = Entity.getCurEnts().filter(entity => ((filters.includes(entity.Col)) != filterOut) && entity.Pos.compare(pos));
+
+		return entities.size > 0 ? entities : null
+	}
+
+	static addEntity(entity, mapName) {
+		if (mapName) {
+			this.getEnts(mapName).add(entity)
+		} else {
+			this.getCurEnts().add(entity)
+		}
+		GameManager.Entities.add(entity)
+	}
 }
 
-class Chest extends Entity {
+export class Chest extends Entity {
 	constructor(pos, content, quantity = 1) {
 		super(pos)
 		this.Content = content
@@ -138,7 +168,7 @@ class Chest extends Entity {
 	}
 }
 
-class AreaTrigger extends Entity {
+export class AreaTrigger extends Entity {
 	constructor(pos, map, endX, endY) {
 		super(pos)
 		this.Map = map
@@ -155,7 +185,7 @@ class AreaTrigger extends Entity {
 	}
 }
 
-class Teleporter extends Entity {
+export class Teleporter extends Entity {
 	constructor(pos, endX, endY) {
 		super(pos)
 		this.EndX = endX
@@ -167,7 +197,7 @@ class Teleporter extends Entity {
 	}
 }
 
-class Spike extends Teleporter {
+export class Spike extends Teleporter {
 	constructor(pos, endX, endY) {
 		super(pos)
 		this.EndX = endX
@@ -180,7 +210,7 @@ class Spike extends Teleporter {
 	}
 }
 
-class Door extends Entity {
+export class Door extends Entity {
 	constructor(pos, id, map, endX, endY) {
 		super(pos)
 		this.ID = id
@@ -194,7 +224,7 @@ class Door extends Entity {
 	}
 }
 
-class Heart extends Entity {
+export class Heart extends Entity {
 	constructor(pos) {
 		super(pos, Collision.Transparent)
 	}
@@ -205,7 +235,7 @@ class Heart extends Entity {
 	}
 }
 
-class Button extends Entity {
+export class Button extends Entity {
 	constructor(pos, id) {
 		super(pos)
 		this.ID = id
@@ -227,7 +257,7 @@ class Button extends Entity {
 	}
 }
 
-class Bomb extends Entity {
+export class Bomb extends Entity {
 	constructor(pos) {
 		super(pos, Collision.Transparent)
 		this.timeout = setTimeout(() => {
@@ -239,7 +269,7 @@ class Bomb extends Entity {
 		let entities = new Set()
 		Object.entries(Directions).forEach(([_, dir]) => {
 			const pos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
-			const ents = getEntities(pos, [])
+			const ents = Entity.getEntities(pos, [])
 			if (ents) {
 				entities = entities.union(ents)
 			}
@@ -251,7 +281,7 @@ class Bomb extends Entity {
 				entity.takeDamage(2, this)
 		})
 
-		entities = getEntities(this.Pos, [])
+		entities = Entity.getEntities(this.Pos, [])
 		if (entities) {
 			entities.forEach(entity => {
 				if ((entity instanceof NPC))
@@ -266,7 +296,7 @@ class Bomb extends Entity {
 
 // NPC
 
-class NPC extends Entity {
+export class NPC extends Entity {
 	constructor(pos, health = 3, damage = 1, dir = Directions.South) {
 		super(pos, Collision.Solid, dir)
 		this.Health = (health instanceof Health) ? health : new Health(health, health)
@@ -289,11 +319,11 @@ class NPC extends Entity {
 
 		const nextPos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
 
-		if (getObjects(nextPos)) {
-			if (!getObjects(new Pos(nextPos.X, this.Pos.Y))) {
+		if (nextPos.getObjects()) {
+			if (!new Pos(nextPos.X, this.Pos.Y).getObjects()) {
 				nextPos.Y = this.Pos.Y
 			}
-			if (!getObjects(new Pos(this.Pos.X, nextPos.Y))) {
+			if (!new Pos(this.Pos.X, nextPos.Y).getObjects()) {
 				nextPos.X = this.Pos.X
 			}
 		}
@@ -311,13 +341,13 @@ class NPC extends Entity {
 
 		drawEntities()
 
-		const entities = getEntities(nextPos)
+		const entities = Entity.getEntities(nextPos)
 		if (entities) {
 			this.triggerEvents(entities, dir)
 			return
 		}
 
-		const tEntities = getEntities(nextPos, [Collision.Transparent], false)
+		const tEntities = Entity.getEntities(nextPos, [Collision.Transparent], false)
 		if (tEntities) {
 			this.triggerEvents(tEntities, dir)
 		}
@@ -328,7 +358,7 @@ class NPC extends Entity {
 		if (!this.Pos.isValidDiagonal(map, dir)) return
 		// if (getObjects(new Pos(nextPos.X, this.Pos.Y)) && getObjects(new Pos(this.Pos.X, nextPos.Y))) return
 
-		if (Pos.compare(nextPos, this.Pos) || !nextPos.isValid(map)) return
+		if (nextPos.compare(this.Pos) || !nextPos.isValid(map)) return
 
 		this.Pos.setPos(nextPos)
 
@@ -354,7 +384,7 @@ class NPC extends Entity {
 				return
 
 			const attackPos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
-			const entities = getEntities(attackPos)
+			const entities = Entity.getEntities(attackPos)
 
 			slashEffect(attackPos, dir)
 
@@ -393,7 +423,7 @@ class NPC extends Entity {
 	}
 }
 
-class Player extends NPC {
+export class Player extends NPC {
 	constructor(pos) {
 		super(pos, GameSettings.MaxHealth)
 		this.InTrigger = false
@@ -413,7 +443,7 @@ class Player extends NPC {
 
 	use(dir) {
 		const usePos = new Pos(this.Pos.X + dir.dx, this.Pos.Y + dir.dy)
-		const entities = getEntities(usePos, [])
+		const entities = Entity.getEntities(usePos, [])
 
 		if (entities) {
 			entities.forEach(entity => {
@@ -445,13 +475,46 @@ class Player extends NPC {
 
 	bomb() {
 		if (this.Inventory.bomb && this.Inventory.bomb > 0) {
-			addEntity(new Bomb(this.Pos))
+			Entity.addEntity(new Bomb(this.Pos))
 			this.Inventory.bomb--
 		}
 	}
+
+	reload() {
+		const pPos = Pos.posToScreen(this.Pos)
+		pPos.X += MapSettings.CellSize / 2
+		pPos.Y += MapSettings.CellSize / 2
+
+		const relPos = new Pos(GameManager.MousePos.X - pPos.X, GameManager.MousePos.Y - pPos.Y)
+
+		if (relPos.X > 0) {
+			this.Mirrored = false
+		}
+		else if (relPos.X < 0) {
+			this.Mirrored = true
+		}
+
+		if (Math.abs(relPos.X) > Math.abs(relPos.Y)) {
+			if (relPos.X > 0)
+				this.Dir = Directions.East
+			else if (relPos.X < 0)
+				this.Dir = Directions.West
+		} else if (Math.abs(relPos.X) < Math.abs(relPos.Y)) {
+			if (relPos.Y > 0)
+				this.Dir = Directions.South
+			else if (relPos.Y < 0)
+				this.Dir = Directions.North
+		}
+
+		const evil = Entity.getCurEnt(Evil)
+		if (evil && evil.Active) {
+			evil.update()
+		}
+		drawEntities()
+	}
 }
 
-class Bush extends NPC {
+export class Bush extends NPC {
 	constructor(pos, map, endX, endY) {
 		super(pos, 1)
 		this.Map = map
@@ -464,16 +527,16 @@ class Bush extends NPC {
 	}
 }
 
-class Mirror extends NPC {
+export class Mirror extends NPC {
 	constructor(pos) {
 		super(pos, 1)
 	}
 
 	onDeath() {
-		const right = getEntities(new Pos(this.Pos.X + 1, this.Pos.Y))
-		const left = getEntities(new Pos(this.Pos.X - 1, this.Pos.Y))
-		const up = getEntities(new Pos(this.Pos.X, this.Pos.Y - 1))
-		const down = getEntities(new Pos(this.Pos.X, this.Pos.Y + 1))
+		const right = Entity.getEntities(new Pos(this.Pos.X + 1, this.Pos.Y))
+		const left = Entity.getEntities(new Pos(this.Pos.X - 1, this.Pos.Y))
+		const up = Entity.getEntities(new Pos(this.Pos.X, this.Pos.Y - 1))
+		const down = Entity.getEntities(new Pos(this.Pos.X, this.Pos.Y + 1))
 
 		let entities = new Set()
 
@@ -487,7 +550,7 @@ class Mirror extends NPC {
 				entity.takeDamage(1, this)
 		})
 
-		const evil = getCurEnt(Evil)
+		const evil = Entity.getCurEnt(Evil)
 		if (evil && !evil.Active) {
 			evil.Active = true
 		}
@@ -496,7 +559,7 @@ class Mirror extends NPC {
 	}
 }
 
-class CrackedWall extends NPC {
+export class CrackedWall extends NPC {
 	constructor(pos) {
 		super(pos, 1)
 	}
@@ -510,7 +573,7 @@ class CrackedWall extends NPC {
 
 // Enemy
 
-class Enemy extends NPC {
+export class Enemy extends NPC {
 	constructor(pos, health = new Health(3, 3), damage = 1, dir = Directions.South) {
 		super(pos, health, damage, dir)
 		this.MoveFrames = 1
@@ -528,19 +591,20 @@ class Enemy extends NPC {
 
 	update() {
 		if ((this.MoveOffset + GameManager.TickCount) % this.MoveFrames === 0) {
+			const player = Entity.getCurEnt(Player)
 			this.moveTowards(player.Pos)
 		}
 	}
 }
 
-class Zombie extends Enemy {
+export class Zombie extends Enemy {
 	constructor(pos) {
 		super(pos, 3)
 		this.MoveFrames = 3
 	}
 }
 
-class Evil extends Enemy {
+export class Evil extends Enemy {
 	constructor(pos) {
 		super(pos, 5, 2)
 		this.MoveFrames = 2
@@ -567,5 +631,15 @@ class Evil extends Enemy {
 	onDeath() {
 		activate('mirror_doors')
 		super.onDeath()
+	}
+
+	reload() {
+		this.Pos.setPos(player.Pos.X, (MapSettings.Height - 1) - player.Pos.Y)
+		this.Dir = player.Dir
+		this.Mirrored = player.Mirrored
+		if (this.Dir === Directions.North)
+			this.Dir = Directions.South
+		else if (this.Dir === Directions.South)
+			this.Dir = Directions.North
 	}
 }

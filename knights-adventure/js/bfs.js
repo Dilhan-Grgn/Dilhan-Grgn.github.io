@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-function bfs(map, startPos, endPos) {
+export function bfs(map, startPos, endPos) {
 	map[startPos.X][startPos.Y] = 0
 	map[endPos.X][endPos.Y] = 0
 	const queue = []
@@ -32,7 +32,7 @@ function bfs(map, startPos, endPos) {
 	queue.push(startPos)
 	while (queue.length > 0) {
 		const curPos = queue.shift()
-		if (Pos.compare(curPos, endPos)) {
+		if (curPos.compare(endPos)) {
 			return reconstructPath(curPos, map)
 		}
 
@@ -42,7 +42,7 @@ function bfs(map, startPos, endPos) {
 				nPos.Parent = curPos
 				queue.push(nPos)
 			}
-		});
+		})
 	}
 }
 

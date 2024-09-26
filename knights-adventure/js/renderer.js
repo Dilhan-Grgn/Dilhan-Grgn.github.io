@@ -22,7 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-function drawGrid() {
+import { MapSettings } from "./manager.js";
+import { ObjectsGrid } from "./consts.js";
+import { fillElement } from "./utils.js";
+import { Pos } from "./classes.js";
+import { Entity } from './entities.js';
+
+var displayGrid = []
+export function drawGrid() {
 	displayGrid = []
 	for (let x = 0; x < MapSettings.Width; x++) {
 		const cols = []
@@ -35,7 +42,7 @@ function drawGrid() {
 	}
 }
 
-function drawMap() {
+export function drawMap() {
 	let x = 0
 	ObjectsGrid.forEach(objectsCol => {
 		let y = 0
@@ -52,11 +59,11 @@ function drawMap() {
 	gui.style.top = `${MapSettings.GridSize}px`
 }
 
-function drawEntities() {
+export function drawEntities() {
 	const children = Array.prototype.slice.call(entitiesDisplay.children)
 	children.forEach(child => {
 		let valid = false
-		getCurEnts().forEach(entity => {
+		Entity.getCurEnts().forEach(entity => {
 			if (child.id == entity.uniqueID()) {
 				valid = true
 			}
@@ -67,7 +74,7 @@ function drawEntities() {
 		}
 	})
 
-	getCurEnts().forEach(entity => {
+	Entity.getCurEnts().forEach(entity => {
 		let element = document.getElementById(entity.uniqueID())
 		if (!element) {
 			element = document.createElement("div")
@@ -79,6 +86,6 @@ function drawEntities() {
 	})
 }
 
-function resizeGUI() {
+export function resizeGUI() {
 	gui.style.width = `${MapSettings.Width * MapSettings.CellSize}px`
 }

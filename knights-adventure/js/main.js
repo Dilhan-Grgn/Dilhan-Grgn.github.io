@@ -27,7 +27,7 @@ import { loadMapsJSONs, loadMap } from "./maps.js"
 import { GameManager, MapSettings, GameSettings } from "./manager.js"
 import { drawGrid } from "./renderer.js"
 import { Pos, Directions } from "./classes.js"
-import { drawEntities, resizeGUI } from "./renderer.js"
+import { drawEntities, resizeGUI, drawMap } from "./renderer.js"
 
 const KEY_UPDATE_MAP = new Map()
 
@@ -118,6 +118,9 @@ function main(...args) {
 	loadMap('start')
 	dialogBox.showText('You woke up in a field without anything!')
 	player = new Player(new Pos(7, 7))
+	// player.giveSword()
+	// player.giveShield()
+	// player.giveItems("bomb", 10)
 	Entity.getCurEnts().add(player)
 	drawEntities()
 	resizeGUI()

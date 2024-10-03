@@ -148,20 +148,22 @@ export class Chest extends Entity {
 
 		dialogBox.showText(`You\'ve got ${this.Quantity <= 1 ? 'a' : this.Quantity} ${this.Content + (this.Quantity <= 1 ? '' : 's')}!`)
 
-		if (user.Inventory[this.Content]) {
-			user.Inventory[this.Content] += this.Quantity
-		} else {
-			user.Inventory[this.Content] = this.Quantity
+		if (!user || !user.giveItems) {
+			return
 		}
 
 		switch (this.Content) {
 			case 'sword':
-				user.Sprite += 1
-				break;
+				user.giveSword()
+				break
 			case 'shield':
-				user.Sprite += 2
-				break;
+				user.giveShield()
+				break
+			default:
+				user.giveItems(this.Content, this.Quantity)
+				break
 		}
+
 
 		this.Sprite++
 		this.Opened = true
@@ -460,13 +462,23 @@ export class Player extends NPC {
 	}
 
 	giveSword() {
+		if (this.Inventory.sword >= 1 && (this.Sprite == 1 || this.Sprite == 3)) return
 		this.Inventory.sword = 1
 		this.Sprite += 1
 	}
 
 	giveShield() {
+		if (this.Inventory.shield >= 1 && (this.Sprite == 2 || this.Sprite == 3)) return
 		this.Inventory.shield = 1
 		this.Sprite += 2
+	}
+
+	giveItems(item, quantity) {
+		if (this.Inventory[item]) {
+			this.Inventory[item] += quantity
+		} else {
+			this.Inventory[item] = quantity
+		}
 	}
 
 	move(dir) {
@@ -507,8 +519,8 @@ export class Player extends NPC {
 		}
 
 		const evil = Entity.getCurEnt(Evil)
-		if (evil && evil.Active) {
-			evil.update()
+		if (evil && !evil.Active) {
+			evil.reload()
 		}
 		drawEntities()
 	}
@@ -634,6 +646,7 @@ export class Evil extends Enemy {
 	}
 
 	reload() {
+		const player = Entity.getCurEnt(Player)
 		this.Pos.setPos(player.Pos.X, (MapSettings.Height - 1) - player.Pos.Y)
 		this.Dir = player.Dir
 		this.Mirrored = player.Mirrored

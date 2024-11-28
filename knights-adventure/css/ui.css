@@ -22,6 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+@import url("mobile-ui.css") screen and (max-width: 768px);
+@import url("mobile-ui.css") screen and (max-height: 768px);
+
+#mobileControls {
+	display: none;
+}
+
 #gui {
 	margin-top: calc(var(--square-size) / 10);
 }
@@ -31,16 +38,13 @@ SOFTWARE.
 	justify-content: space-between;
 }
 
-#gui header * {
-	vertical-align: middle;
-}
-
 #gui header > * {
 	height: calc(var(--square-size) * 0.75);
 	display: flex;
 	gap: calc(var(--square-size) / 10);
+	align-items: center;
 }
 
-#gui header > * > * {
+#gui header > * > img {
 	height: 100%;
 }

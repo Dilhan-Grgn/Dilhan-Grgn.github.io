@@ -56,7 +56,7 @@ export function drawMap() {
 
 	gui.style.position = 'absolute'
 	gui.style.left = `${(window.innerWidth - MapSettings.GridSize) / 2}px`
-	gui.style.top = `${MapSettings.GridSize}px`
+	gui.style.top = `${MapSettings.GridSize + MapSettings.CellSize}px`
 }
 
 export function drawEntities() {

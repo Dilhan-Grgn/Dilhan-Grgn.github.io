@@ -32,7 +32,7 @@ export class Pos {
 	}
 
 	toString() {
-		return `[X: ${this.X},Y: ${this.Y}]`
+		return `[X: ${this.X}, Y: ${this.Y}]`
 	}
 
 	isValid(map) {
@@ -93,6 +93,98 @@ export class Pos {
 		const entities = Entity.getEntities(this, filters, filterOut)
 
 		return tile || entities ? { Tile: tile, Entities: entities } : null
+	}
+
+	add(x) {
+		let cx;
+		let cy;
+
+		switch (typeof x) {
+			case 'Pos':
+				cx = x.X
+				cy = x.Y
+				break;
+			case 'number':
+				cx = x
+				cy = x
+				break;
+			default:
+				throw new Error("Invalid type");
+		}
+
+		return new Pos(
+			this.X + cx,
+			this.Y + cy
+		)
+	}
+
+	substract(x) {
+		let cx;
+		let cy;
+
+		switch (typeof x) {
+			case 'Pos':
+				cx = x.X
+				cy = x.Y
+				break;
+			case 'number':
+				cx = x
+				cy = x
+				break;
+			default:
+				throw new Error("Invalid type");
+		}
+
+		return new Pos(
+			this.X - cx,
+			this.Y - cy
+		)
+	}
+
+	multiply(x) {
+		let cx;
+		let cy;
+
+		switch (typeof x) {
+			case 'Pos':
+				cx = x.X
+				cy = x.Y
+				break;
+			case 'number':
+				cx = x
+				cy = x
+				break;
+			default:
+				throw new Error("Invalid type");
+		}
+
+		return new Pos(
+			this.X * cx,
+			this.Y * cy
+		)
+	}
+
+	divide(x) {
+		let cx;
+		let cy;
+
+		switch (typeof x) {
+			case 'Pos':
+				cx = x.X
+				cy = x.Y
+				break;
+			case 'number':
+				cx = x
+				cy = x
+				break;
+			default:
+				throw new Error("Invalid type");
+		}
+
+		return new Pos(
+			this.X / cx,
+			this.Y / cy
+		)
 	}
 }
 

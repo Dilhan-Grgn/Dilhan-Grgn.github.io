@@ -49,7 +49,7 @@ function KeyUpdates(keycode) {
 
 		if (keycode === 'KeyE')
 			player.use(player.Dir)
-		if (keycode === 'Space' && player.Sword)
+		if (keycode === 'Space')
 			player.attack(player.Dir)
 		if (keycode === 'KeyQ')
 			player.bomb()
@@ -58,24 +58,54 @@ function KeyUpdates(keycode) {
 	}
 }
 
+function InputPress(keyCode) {
+	if (GameSettings.ValidKeys.includes(keyCode) && !KEY_UPDATE_MAP.has(keyCode)) {
+		KeyUpdates(keyCode)
+		KEY_UPDATE_MAP.set(keyCode, setInterval(() => KeyUpdates(keyCode), GameSettings.TPS))
+	}
+}
+
+function InputRelease(keyCode) {
+	if (GameSettings.ValidKeys.includes(keyCode) && KEY_UPDATE_MAP.has(keyCode)) {
+		clearInterval(KEY_UPDATE_MAP.get(keyCode))
+		KEY_UPDATE_MAP.delete(keyCode)
+	}
+}
+
 onkeydown = (event) => {
-	if (GameSettings.ValidKeys.includes(event.code) && !KEY_UPDATE_MAP.has(event.code)) {
-		KeyUpdates(event.code)
-		KEY_UPDATE_MAP.set(event.code, setInterval(() => KeyUpdates(event.code), GameSettings.TPS))
+	InputPress(event.code)
+	if (player) {
+		player.Mobile = false
 	}
 }
 
 onkeyup = (event) => {
-	if (GameSettings.ValidKeys.includes(event.code) && KEY_UPDATE_MAP.has(event.code)) {
-		clearInterval(KEY_UPDATE_MAP.get(event.code))
-		KEY_UPDATE_MAP.delete(event.code)
-	}
+	InputRelease(event.code)
 }
 
-onclick = (event) => {
-	if (player.Inventory.hasOwnProperty('sword'))
+onclick = () => {
+	if (!player.Mobile)
 		player.attack(player.Dir)
 }
+
+const buttons = document.querySelectorAll("#mobileControls button")
+buttons.forEach(button => {
+	const keyCode = button.getAttribute("input")
+	button.ontouchstart = () => {
+		InputPress(keyCode)
+		if (player) {
+			player.Mobile = true
+		}
+	}
+
+	button.ontouchend = () => {
+		InputRelease(keyCode)
+	}
+
+	button.ontouchcancel = () => {
+		InputRelease(keyCode)
+	}
+})
 
 onmousemove = (event) => {
 	if (!player) return
@@ -112,21 +142,28 @@ function update() {
 }
 
 var player
+const DEBUG_MODE = true
 function main(...args) {
 	GameManager.Maps = loadMapsJSONs(MapSettings.Maps)
 	drawGrid()
 	loadMap('start')
 	dialogBox.showText('You woke up in a field without anything!')
 	player = new Player(new Pos(7, 7))
-	// player.giveSword()
-	// player.giveShield()
-	// player.giveItems("bomb", 10)
+
+	if (DEBUG_MODE) {
+		player.giveSword()
+		player.giveShield()
+		player.giveItems("bomb", 10)
+	}
+
 	Entity.getCurEnts().add(player)
 	drawEntities()
 	resizeGUI()
 	setInterval(() => {
 		update()
 	}, GameSettings.TPS)
+	const root = document.querySelector(":root")
+	root.style.setProperty('--tps', `${GameSettings.TPS}ms`);
 }
 
 main()

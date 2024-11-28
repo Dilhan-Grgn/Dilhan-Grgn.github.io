@@ -31,8 +31,16 @@ SOFTWARE.
 :root {
 	--grid-size: 16;
 	--square-size: min(calc(100vh/var(--grid-size) * 0.8), calc(100vw/var(--grid-size) * 0.8));
-	font-size: min(3vh, 3vw);
+	font-size: min(3vh, 5vw);
 	overflow: hidden;
+	--tps: calc(1000 / 5);
+}
+
+#display *, #entitiesDisplay * {
+	transition: all var(--tps) ease;
+	-webkit-transition:  all var(--tps) ease;
+	-o-transition: all var(--tps) ease;
+	-moz-transition: all var(--tps) ease;
 }
 
 h1 {

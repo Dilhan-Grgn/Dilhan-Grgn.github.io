@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Chest, AreaTrigger, Teleporter, Spike, Door, Heart, Button, Bomb, Player, Bush, Mirror, CrackedWall, Zombie, Evil } from "./entities.js";
+import * as Entities from "./entities.js";
 import { Pos } from "./classes.js";
 import { GameManager, MapSettings } from "./manager.js"
 import { ObjectsGrid } from "./consts.js";
@@ -60,7 +60,7 @@ export function getCollisionMap() {
 export function parseEntities(entities) {
 	const newEntities = new Set()
 	entities.forEach(entity => {
-		const classRef = eval(entity[0])
+		const classRef = eval(`Entities.${entity[0]}`)
 		if (!classRef) {
 			throw Error(`${entity[0]} isn't a valid entity class name!`)
 		}

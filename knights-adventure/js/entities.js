@@ -294,6 +294,10 @@ export class Bomb extends Entity {
 		this.delete()
 		drawEntities()
 	}
+
+	disable() {
+		clearTimeout(this.timeout)
+	}
 }
 
 // NPC
@@ -430,6 +434,7 @@ export class Player extends NPC {
 		super(pos, GameSettings.MaxHealth)
 		this.InTrigger = false
 		this.Inventory = {}
+		this.Mobile = false
 	}
 
 	triggerEvents(entities, ...args) {
@@ -455,6 +460,12 @@ export class Player extends NPC {
 			});
 		}
 		drawEntities()
+	}
+
+	attack(dir) {
+		if (this.Inventory.hasOwnProperty('sword')) {
+			super.attack(dir)
+		}
 	}
 
 	onDeath(attacker) {
@@ -483,6 +494,18 @@ export class Player extends NPC {
 
 	move(dir) {
 		super.move(dir)
+		if (this.Mobile) {
+			this.Dir = dir
+			switch (dir) {
+				case Directions.East:
+					this.Mirrored = false
+					break;
+
+				case Directions.West:
+					this.Mirrored = true
+					break;
+			}
+		}
 	}
 
 	bomb() {
@@ -497,25 +520,27 @@ export class Player extends NPC {
 		pPos.X += MapSettings.CellSize / 2
 		pPos.Y += MapSettings.CellSize / 2
 
-		const relPos = new Pos(GameManager.MousePos.X - pPos.X, GameManager.MousePos.Y - pPos.Y)
+		if (!this.Mobile) {
+			const relPos = new Pos(GameManager.MousePos.X - pPos.X, GameManager.MousePos.Y - pPos.Y)
 
-		if (relPos.X > 0) {
-			this.Mirrored = false
-		}
-		else if (relPos.X < 0) {
-			this.Mirrored = true
-		}
+			if (relPos.X > 0) {
+				this.Mirrored = false
+			}
+			else if (relPos.X < 0) {
+				this.Mirrored = true
+			}
 
-		if (Math.abs(relPos.X) > Math.abs(relPos.Y)) {
-			if (relPos.X > 0)
-				this.Dir = Directions.East
-			else if (relPos.X < 0)
-				this.Dir = Directions.West
-		} else if (Math.abs(relPos.X) < Math.abs(relPos.Y)) {
-			if (relPos.Y > 0)
-				this.Dir = Directions.South
-			else if (relPos.Y < 0)
-				this.Dir = Directions.North
+			if (Math.abs(relPos.X) > Math.abs(relPos.Y)) {
+				if (relPos.X > 0)
+					this.Dir = Directions.East
+				else if (relPos.X < 0)
+					this.Dir = Directions.West
+			} else if (Math.abs(relPos.X) < Math.abs(relPos.Y)) {
+				if (relPos.Y > 0)
+					this.Dir = Directions.South
+				else if (relPos.Y < 0)
+					this.Dir = Directions.North
+			}
 		}
 
 		const evil = Entity.getCurEnt(Evil)

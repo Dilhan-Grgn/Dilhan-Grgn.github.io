@@ -39,13 +39,13 @@ export function fillElement(element, pos, object) {
 	element.style.height = `${MapSettings.CellSize}px`
 	const screen = Pos.posToScreen(pos)
 	element.style.left = `${screen.X}px`
-	element.style.top = `${screen.Y}px`
+	element.style.top = `${screen.Y + MapSettings.CellSize}px`
 	element.style.backgroundColor = 'transparent'
 
 	element.setAttribute('position', pos.toString())
 
 	if (!object) return
-	element.style.transition = GameSettings.TPS + 'ms all'
+	// element.style.transition = GameSettings.TPS + 'ms all'
 
 	if (object instanceof Entity) {
 		element.classList.add('entity')
@@ -68,4 +68,8 @@ export function fillElement(element, pos, object) {
 			element.style.backgroundImage = ''
 		}
 	}
+}
+
+export function bezierCurve(t, x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1) {
+	throw new Error("Not implemented");
 }

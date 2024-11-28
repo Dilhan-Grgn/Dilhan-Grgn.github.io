@@ -1,0 +1,81 @@
+:root {
+	--padding: 20px;
+	--bottom: 70px
+}
+
+#mobileControls {
+	display: flex !important;
+	position: fixed;
+	bottom: var(--bottom);
+	justify-content: space-between;
+	width: calc(100vw - var(--padding) * 2);
+	padding: var(--padding);
+}
+
+#mobileControls button {
+	border: none;
+	background-color: transparent;
+	background-image: url("../img/ui/mobile/button.png");
+	width: max(6vh, 6vw);
+	height: max(6vh, 6vw);
+	padding: 5px;
+}
+
+#mobileControls button img {
+	width: 100%;
+	aspect-ratio: 1 / 1;
+}
+
+#dPad {
+	display: grid;
+	grid-template-areas:
+		". U ."
+		"L . R"
+		". D .";
+	gap: 5px;
+}
+
+#btnUp {
+	grid-area: U;
+	transform: rotate(0deg);
+}
+
+#btnLeft {
+	grid-area: L;
+	transform: rotate(270deg);
+}
+
+#btnRight {
+	grid-area: R;
+	transform: rotate(90deg);
+}
+
+#btnDown {
+	grid-area: D;
+	transform: rotate(180deg);
+}
+
+#itemButtons {
+	display: grid;
+	grid-template-areas:
+		". B ."
+		"H . I"
+		". W .";
+	gap: 5px;
+}
+
+#btnSword {
+	grid-area: W;
+}
+
+#btnBomb {
+	grid-area: B;
+}
+
+#btnShield {
+	grid-area: H;
+}
+
+#btnInteract {
+	grid-area: I;
+}

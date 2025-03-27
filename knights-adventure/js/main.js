@@ -142,7 +142,7 @@ function update() {
 }
 
 var player
-const DEBUG_MODE = true
+const DEBUG_MODE = false
 function main(...args) {
 	GameManager.Maps = loadMapsJSONs(MapSettings.Maps)
 	drawGrid()
